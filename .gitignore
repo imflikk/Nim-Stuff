@@ -1,3 +1,7 @@
+# Nim folders
 nimcache/
 nimblecache/
 htmldocs/
+
+# Generated EXEs and DLLs
+bin/
