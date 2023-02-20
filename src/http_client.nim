@@ -13,15 +13,15 @@ if len(url) != 0:
   echo "[+] Result: ", client.getContent(url)
 
   # Build a basic POST request with JSON
-  echo "[*] Making POST request to ", url
+  echo "[*] Making POST request to ", url & "/register"
   client.headers = newHttpHeaders({ "Content-Type": "application/json" })
   let body = %*{
     "data": "secrets"
   }
 
   # Make the POST request
-  let response = client.request(url, httpMethod = HttpPost, body = $body)
-  echo "[+] Response code: ", response.status
+  let response = client.request(url & "/register", httpMethod = HttpPost, body = $body)
+  echo "[+] Result: ", response.body
 
 else:
     echo "Error reading URL."
